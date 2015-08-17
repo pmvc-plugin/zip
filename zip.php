@@ -11,7 +11,7 @@ class zip extends \PMVC\PlugIn
     /**
      * @see http://www.phpconcept.net/pclzip/user-guide/18
      */
-    public function get($zip_file)
+    public function open($zip_file)
     {
         if (!class_exists('PclZip')) {
             \PMVC\l(__DIR__.'/src/pclzip.lib.php');
@@ -36,22 +36,22 @@ class zip extends \PMVC\PlugIn
        $fl->rmdir($tmp_dir);
     }
     
-    public function addFromString($str,$zipPath=null,$zip=null)
+    public function addFromString($zipPath, $content, $zip=null)
     {
        if (is_null($zip)) {
         $zip = $this['current'];
        }
-       if (is_null($zipPath)) {
-        $zipPath = time();
-       }
        $tmp = tempnam(sys_get_temp_dir(), 'zip_');
-       file_put_contents($tmp, $str);
+       file_put_contents($tmp, $content);
        $this->addFile($tmp, $zipPath, $zip);
        unlink($tmp);
     }
 
     public function addFile($file,$zipPath,$zip=null)
     {
+       if (is_null($zip)) {
+        $zip = $this['current'];
+       }
        $tmp_dir = $this->getTempFolder();
        $wholdPath = $tmp_dir.$zipPath;
        $zipDir = dirname($wholdPath);
