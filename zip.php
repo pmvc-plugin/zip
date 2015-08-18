@@ -7,7 +7,7 @@ ${_INIT_CONFIG}[_CLASS] = __NAMESPACE__.'\zip';
 class zip extends \PMVC\PlugIn
 {
 
-    private $tmpdir_append_str = '_dir/';
+    private $tmpPrefix = 'zip_';
     /**
      * @see http://www.phpconcept.net/pclzip/user-guide/18
      */
@@ -21,30 +21,11 @@ class zip extends \PMVC\PlugIn
         return $zip;
     }
 
-    public function getTempFolder()
-    {
-       $tmp = tempnam(sys_get_temp_dir(), 'zip_');
-       $tmp_dir = $tmp.$this->tmpdir_append_str;
-       mkdir($tmp_dir,-1,true);
-       return $tmp_dir;
-    }
-
-    public function cleanTempFolder($tmp_dir)
-    {
-       unlink(substr($tmp_dir,0,strlen($tmp_dir)-strlen($this->tmpdir_append_str)));
-       $fl = \PMVC\plug('file_list');
-       $fl->rmdir($tmp_dir);
-    }
-    
     public function addFromString($zipPath, $content, $zip=null)
     {
-       if (is_null($zip)) {
-        $zip = $this['current'];
-       }
-       $tmp = tempnam(sys_get_temp_dir(), 'zip_');
+       $tmp = \PMVC\plug('tmp')->file($this->tmpPrefix);
        file_put_contents($tmp, $content);
        $this->addFile($tmp, $zipPath, $zip);
-       unlink($tmp);
     }
 
     public function addFile($file,$zipPath,$zip=null)
@@ -52,7 +33,7 @@ class zip extends \PMVC\PlugIn
        if (is_null($zip)) {
         $zip = $this['current'];
        }
-       $tmp_dir = $this->getTempFolder();
+       $tmp_dir =\PMVC\plug('tmp')->dir($this->tmpPrefix);
        $wholdPath = $tmp_dir.$zipPath;
        $zipDir = dirname($wholdPath);
        if (!is_dir($zipDir)) {
@@ -60,6 +41,5 @@ class zip extends \PMVC\PlugIn
        }
        copy($file, $wholdPath);
        $zip->add($tmp_dir, PCLZIP_OPT_REMOVE_PATH, $tmp_dir);
-       $this->cleanTempFolder($tmp_dir);
     }
 }

@@ -16,7 +16,7 @@ class ZipTest extends PHPUnit_Framework_TestCase
     function testGetZip()
     {
        $zip = PMVC\plug($this->_plug);
-       $zipfile = $zip->get('xxx.zip');
-       $zip->addFromString('123');
+       $zipfile = $zip->open('xxx.zip');
+       $zip->addFromString('/456','123');
     }
 }
