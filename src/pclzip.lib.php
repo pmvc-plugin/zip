@@ -212,7 +212,7 @@
   //   Note that no real action is taken, if the archive does not exist it is not
   //   created. Use create() for that.
   // --------------------------------------------------------------------------------
-  function PclZip($p_zipname)
+  function __construct($p_zipname)
   {
 
     // ----- Tests the zlib
@@ -1395,7 +1395,14 @@
     }
 
     // ----- Check the magic code
-    // TBC
+    $fh = fopen($this->zipname, "r");
+    $blob = fgets($fh, 5);
+    fclose($fh);
+    if (strpos($blob, 'PK') === false) {
+      // ----- Error log
+      PclZip::privErrorLog(PCLZIP_ERR_READ_OPEN_FAIL, "Not a valid zip archive '".$this->zipname."'");
+      return(false);
+    }
 
     // ----- Check the central header
     // TBC
@@ -1836,16 +1843,24 @@
     $v_memory_limit = ini_get('memory_limit');
     $v_memory_limit = trim($v_memory_limit);
     $last = strtolower(substr($v_memory_limit, -1));
- 
-    if($last == 'g')
+
+    switch ($last) {
+      case 'g':
         //$v_memory_limit = $v_memory_limit*1024*1024*1024;
+        $v_memory_limit = substr($v_memory_limit, 0, -1);
         $v_memory_limit = $v_memory_limit*1073741824;
-    if($last == 'm')
+        break;
+      case 'm':
         //$v_memory_limit = $v_memory_limit*1024*1024;
+        $v_memory_limit = substr($v_memory_limit, 0, -1);
         $v_memory_limit = $v_memory_limit*1048576;
-    if($last == 'k')
+        break;
+      case 'k':
+        $v_memory_limit = substr($v_memory_limit, 0, -1);
         $v_memory_limit = $v_memory_limit*1024;
-            
+        break;
+    }
+
     $p_options[PCLZIP_OPT_TEMP_FILE_THRESHOLD] = floor($v_memory_limit*PCLZIP_TEMPORARY_FILE_RATIO);
     
 

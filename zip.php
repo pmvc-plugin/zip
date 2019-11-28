@@ -11,14 +11,27 @@ class zip extends \PMVC\PlugIn
     /**
      * @see http://www.phpconcept.net/pclzip/user-guide/18
      */
-    public function open($zip_file)
+    public function open($zip_file, $current = true)
     {
         if (!class_exists('PclZip')) {
             \PMVC\l(__DIR__.'/src/pclzip.lib.php');
         }
         $zip = new \PclZip($zip_file);
-        $this['current'] = $zip; 
+        if ($current) {
+          $this['current'] = $zip; 
+        }
         return $zip;
+    }
+
+    public function checkFileFormat($file)
+    {
+      $zip = $this->open($file, false);
+      return $this->checkZipFormat($zip);
+    }
+
+    public function checkZipFormat($zip)
+    {
+      return $zip->privCheckFormat();
     }
 
     public function addFromString($zipPath, $content, $zip=null)

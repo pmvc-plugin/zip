@@ -1,6 +1,11 @@
 <?php
-PMVC\Load::plug();
-PMVC\addPlugInFolder('../');
+namespace PMVC\PlugIn\zip;
+use PHPUnit_Framework_TestCase;
+use PMVC;
+
+\PMVC\Load::plug();
+\PMVC\addPlugInFolders(['../']);
+
 class ZipTest extends PHPUnit_Framework_TestCase
 {
     private $_plug = 'zip';
@@ -15,11 +20,19 @@ class ZipTest extends PHPUnit_Framework_TestCase
 
     function testGetZip()
     {
-       $tmpZip = 'xxx.zip';
+       $tmpZip = \PMVC\plug('tmp')->file();
        $zip = PMVC\plug($this->_plug);
        $zipfile = $zip->open($tmpZip);
        $zip->addFromString('/456','123');
        $this->assertTrue(is_file($tmpZip));
        $this->assertTrue(0<filesize($tmpZip));
+    }
+
+    function testOpenNonZipFile()
+    {
+       $tmpFile = 'test.php';
+       $zip = PMVC\plug($this->_plug);
+       $this->assertTrue(is_file($tmpFile));
+       $this->assertFalse($zip->checkFileFormat($tmpFile));
     }
 }
